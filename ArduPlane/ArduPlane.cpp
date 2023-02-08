@@ -744,7 +744,7 @@ bool Plane::set_target_location(const Location &target_loc)
 //Set minimum groundspeed (for use by scripting)
 bool Plane::set_groundspeed_min(float speed)
 {
-    aparm.min_gndspeed_cm = speed * 100.0;
+    aparm.min_gndspeed_cm.set(speed * 100.0);
     return true;
 }
 
