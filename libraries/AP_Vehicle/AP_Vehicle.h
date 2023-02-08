@@ -239,6 +239,9 @@ public:
     // returns true if the EKF failsafe has triggered
     virtual bool has_ekf_failsafed() const { return false; }
 
+    // set minimum groundspeed in m/s (for use by scripting)
+    virtual bool set_groundspeed_min(float speed) { return false; }
+
     // control outputs enumeration
     enum class ControlOutput {
         Roll = 1,

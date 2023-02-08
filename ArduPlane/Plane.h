@@ -1214,6 +1214,8 @@ public:
     bool get_target_location(Location& target_loc) override;
     bool update_target_location(const Location &old_loc, const Location &new_loc) override;
     bool set_velocity_match(const Vector2f &velocity) override;
+            // set minimum groundspeed in m/s (for use by scripting)
+    virtual bool set_groundspeed_min(float speed) override;
 #endif // AP_SCRIPTING_ENABLED
 
 };
