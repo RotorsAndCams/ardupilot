@@ -92,6 +92,23 @@ const AP_Param::GroupInfo AC_WPNav::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("TER_MARGIN",  12, AC_WPNav, _terrain_margin, 10.0),
 
+    // @Param: SHIFT_X
+    // @DisplayName: Shift mission points to X direction (on NED)
+    // @Description: Alows dynamic shifting of route 
+    // @Units cm
+    // @Range 0 10000
+    // @User: Advanced
+    AP_GROUPINFO("SHIFT_X",   13, AC_WPNav, _shift_x, 0),
+
+    // @Param: SHIFT_Y
+    // @DisplayName: Shift mission points to Y direction (on NED)
+    // @Description: Alows dynamic shifting of route 
+    // @Units cm
+    // @Range 0 10000
+    // @User: Advanced
+    AP_GROUPINFO("SHIFT_Y",   14, AC_WPNav, _shift_y, 0),
+
+
     AP_GROUPEND
 };
 
@@ -328,6 +345,19 @@ bool AC_WPNav::set_wp_destination(const Vector3f& destination, bool terrain_alt)
     _destination = destination;
     _terrain_alt = terrain_alt;
 
+    _origin_zeroed = _origin;
+    _destination_zeroed = destination;
+
+
+    //Add shift 
+    _origin.x = _origin.x + _shift_x;
+    _origin.y = _origin.y + _shift_y;
+
+    _destination.x = _destination.x + _shift_x;
+    _destination.y = _destination.y + _shift_y;
+
+
+
     if (_flags.fast_waypoint && !_this_leg_is_spline && !_next_leg_is_spline && !_scurve_next_leg.finished()) {
         _scurve_this_leg = _scurve_next_leg;
     } else {
@@ -359,7 +389,12 @@ bool AC_WPNav::set_wp_destination_next(const Vector3f& destination, bool terrain
         return true;
     }
 
-    _scurve_next_leg.calculate_track(_destination, destination,
+    Vector3f new_destination;
+        new_destination = destination;
+        new_destination.x = destination.x + _shift_x;
+        new_destination.y = destination.y + _shift_y;
+
+    _scurve_next_leg.calculate_track(_destination, new_destination,
                                      _pos_control.get_max_speed_xy_cms(), _pos_control.get_max_speed_up_cms(), _pos_control.get_max_speed_down_cms(),
                                      get_wp_acceleration(), _wp_accel_z_cmss,
                                      _scurve_snap * 100.0f, _scurve_jerk * 100.0);
@@ -581,6 +616,24 @@ int32_t AC_WPNav::get_wp_bearing_to_destination() const
 bool AC_WPNav::update_wpnav()
 {
     bool ret = true;
+
+    //Perhaps it does not belong here, but let's check if we can get along with it.
+
+
+
+    //Check if there are changes in the shift vectors
+    if ((abs(_last_shift_x - _shift_x) <  1) || (abs(_last_shift_y - _shift_x) < 1))
+    {
+        _destination.x = _destination_zeroed.x + _shift_x;
+        _destination.y = _destination_zeroed.y + _shift_y;
+
+        _origin.x = _origin_zeroed.x + _shift_x;
+        _origin.y = _origin_zeroed.y + _shift_y;
+
+        _last_shift_x = _shift_x;
+        _last_shift_y = _shift_y;
+
+    }
 
     if (!is_equal(_wp_speed_cms.get(), _last_wp_speed_cms)) {
         set_speed_xy(_wp_speed_cms);
