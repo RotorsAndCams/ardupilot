@@ -278,4 +278,16 @@ protected:
     AP_Int8     _rangefinder_use;       // parameter that specifies if the range finder should be used for terrain following commands
     bool        _rangefinder_healthy;   // true if rangefinder distance is healthy (i.e. between min and maximum)
     float       _rangefinder_alt_cm;    // latest distance from the rangefinder
+
+    
+    AP_Float       _shift_x;       //Shift current wp origin and destination by x cm on X direction
+    AP_Float       _shift_y;       //shift current wp origin and destination by x cm on Y direction
+
+
+    AP_Float       _last_shift_x;   //Temporary storage for detect cahnges in x and y
+    AP_Float       _last_shift_y;
+
+    Vector3f       _destination_zeroed; // Save of the original destination
+    Vector3f       _origin_zeroed;      // Save of the original origin
+
 };
