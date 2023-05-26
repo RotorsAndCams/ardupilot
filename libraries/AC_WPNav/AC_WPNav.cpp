@@ -309,7 +309,7 @@ bool AC_WPNav::set_wp_destination(const Vector3f& destination, bool terrain_alt)
     float origin_speed = 0.0f;
 
     // use previous destination as origin
-    _origin = _destination;
+    _origin = _destination_zeroed;
 
     if (terrain_alt == _terrain_alt) {
         if (_this_leg_is_spline) {
@@ -348,7 +348,7 @@ bool AC_WPNav::set_wp_destination(const Vector3f& destination, bool terrain_alt)
     _origin_zeroed = _origin;
     _destination_zeroed = destination;
 
-
+   
     //Add shift 
     _origin.x = _origin.x + _shift_x;
     _origin.y = _origin.y + _shift_y;
@@ -393,7 +393,7 @@ bool AC_WPNav::set_wp_destination_next(const Vector3f& destination, bool terrain
         new_destination = destination;
         new_destination.x = destination.x + _shift_x;
         new_destination.y = destination.y + _shift_y;
-
+    
     _scurve_next_leg.calculate_track(_destination, new_destination,
                                      _pos_control.get_max_speed_xy_cms(), _pos_control.get_max_speed_up_cms(), _pos_control.get_max_speed_down_cms(),
                                      get_wp_acceleration(), _wp_accel_z_cmss,
@@ -618,17 +618,19 @@ bool AC_WPNav::update_wpnav()
     bool ret = true;
 
     //Perhaps it does not belong here, but let's check if we can get along with it.
-
-
-
+    
+    
+    
     //Check if there are changes in the shift vectors
-    if ((abs(_last_shift_x - _shift_x) <  1) || (abs(_last_shift_y - _shift_x) < 1))
+    if (((int)_last_shift_x != (int)_shift_x) || ((int)_last_shift_y != (int)_shift_y))
     {
         _destination.x = _destination_zeroed.x + _shift_x;
         _destination.y = _destination_zeroed.y + _shift_y;
 
         _origin.x = _origin_zeroed.x + _shift_x;
         _origin.y = _origin_zeroed.y + _shift_y;
+
+        gcs().send_text(MAV_SEVERITY_INFO, "New Shift : X %i -> %i, Y %i -> %i",(int)_last_shift_x, (int)_shift_x, (int)_last_shift_y, (int)_shift_y);
 
         _last_shift_x = _shift_x;
         _last_shift_y = _shift_y;
